@@ -17,7 +17,26 @@ class ContactForm extends Component {
   handleSumbit = (event) => {
     event.preventDefault();
     this.reset();
+
+    if (this.checkDuplicateContacts(this.state)) {
+      return;
+    }
     this.props.onSubmit(this.state);
+  };
+
+  checkDuplicateContacts = (newContact) => {
+    const { existedContacts } = this.props;
+    const isDuplicateNumber = existedContacts.find(
+      ({ number }) => number === newContact.number
+    );
+    const isDuplicateName = existedContacts.find(
+      ({ name }) => name.toLowerCase() === newContact.name.toLowerCase()
+    );
+
+    if (isDuplicateNumber || isDuplicateName) {
+      alert("This number is already in contacts.");
+      return true;
+    }
   };
 
   reset = () => {
@@ -67,7 +86,11 @@ class ContactForm extends Component {
   }
 }
 
+const mapStateToProps = (state) => ({
+  existedContacts: state.phonebook.items,
+});
+
 const mapDispatchToProps = (dispatch) => ({
   onSubmit: (text) => dispatch(phonebookActions.addContact(text)),
 });
-export default connect(null, mapDispatchToProps)(ContactForm);
+export default connect(mapStateToProps, mapDispatchToProps)(ContactForm);
